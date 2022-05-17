@@ -7,13 +7,7 @@ from osascript import osascript
 
 # Listen for Input from PedalBoard
 with mido.open_input('FCB 1010') as inport:
-    # Dictionary Control Change Values to MOdifier Keys
-    modifiers = {
-        2: 'shift',
-        3: 'ctrl',
-        4: 'option',
-        5: 'command'
-    }
+    volume_increment = 6.25
 
     # Handles MIDI Message
     for msg in inport:
@@ -22,7 +16,7 @@ with mido.open_input('FCB 1010') as inport:
             control = msg.control
             value = msg.value
             
-            if control == 1:    # Toggle Mute
+            if control == 1:    # Mute
                 # Mute or Unmute Based on Passed Value
                 mute = value != 0
                 mute_string = 'set volume output muted '
@@ -33,7 +27,25 @@ with mido.open_input('FCB 1010') as inport:
                     mute_string += 'false'
                 
                 osascript(mute_string)
+            elif control == 3 or control == 5 and value == 127: # Change Volume
+                volume = int(osascript('get volume settings')[1].split(', ')[0].replace('output volume:', ''))  # Get Current Volume
                 
+                # Increase or Decrease Volume Based on Button Pressed
+                volume_up = control == 5
+                
+                if volume_up:
+                    volume += volume_increment
+                else:
+                    volume -= volume_increment
+                
+                # Change Volume
+                volume_string = 'set volume output volume ' + str(volume)
+                osascript(volume_string)
+                
+            elif control == 4:  # Play/Pause Music
+                command_string = "tell app \"Spotify\" to playpause"
+                osascript(command_string)
+
             # Code Below Doesn't Work
             # elif control <= 5:
             #     if value == 127:
