@@ -4,10 +4,18 @@
 import mido
 import pyautogui
 from osascript import osascript
+import os
 
 # Listen for Input from PedalBoard
 with mido.open_input('FCB 1010') as inport:
     volume_increment = 6.25
+    
+    modifiers = {
+        2: 'shift',
+        3: 'control',
+        4: 'option',
+        5: 'command'
+    }
 
     # Handles MIDI Message
     for msg in inport:
@@ -27,31 +35,44 @@ with mido.open_input('FCB 1010') as inport:
                     mute_string += 'false'
                 
                 osascript(mute_string)
-            elif control == 3 or control == 5 and value == 127: # Change Volume
-                volume = int(osascript('get volume settings')[1].split(', ')[0].replace('output volume:', ''))  # Get Current Volume
                 
-                # Increase or Decrease Volume Based on Button Pressed
-                volume_up = control == 5
+            # Media Controls
+            # elif control == 3 or control == 5 and value == 127: # Change Volume
+            #     volume = int(osascript('get volume settings')[1].split(', ')[0].replace('output volume:', ''))  # Get Current Volume
                 
-                if volume_up:
-                    volume += volume_increment
-                else:
-                    volume -= volume_increment
+            #     # Increase or Decrease Volume Based on Button Pressed
+            #     volume_up = control == 5
                 
-                # Change Volume
-                volume_string = 'set volume output volume ' + str(volume)
-                osascript(volume_string)
-                
-            elif control == 4:  # Play/Pause Music
-                command_string = "tell app \"Spotify\" to playpause"
-                osascript(command_string)
-
-            # Code Below Doesn't Work
-            # elif control <= 5:
-            #     if value == 127:
-            #         pyautogui.keyDown(modifiers[control])
+            #     if volume_up:
+            #         volume += volume_increment
             #     else:
-            #         pyautogui.keyUp(modifiers[control])
+            #         volume -= volume_increment
+                
+            #     # Change Volume
+            #     volume_string = 'set volume output volume ' + str(volume)
+            #     osascript(volume_string)
+                
+            # elif control == 4:  # Play/Pause Music
+            #     command_string = "tell app \"Spotify\" to playpause"
+            #     osascript(command_string)
+
+            # Modifier Keys
+            elif control <= 5 and control >= 2:
+                # Build AppleScript Command
+                command_string = """tell application "System Events"\n\tkey """
+                
+                # Key Up/Down with Pedal
+                if value == 127:
+                    command_string += 'down '
+                else:
+                    command_string += 'up '
+                
+                command_string += modifiers[control]    # Select Command Based on Pedal
+                
+                command_string += '\nend tell'
+                
+                osascript(command_string)   # Execute Command
+                # NOTE: If a key is held down as the program terminates, it will continue to be held down. This can be tricky to fix, so do not hold down any pedals as you stop the program.
             
             # Hotkey Macros
             elif control == 6:
