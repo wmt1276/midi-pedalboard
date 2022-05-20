@@ -1,12 +1,20 @@
 # Author: William Trimble
-# Date: 2022-05-16
+# Date: 2022-05-20
 
+import sys
 import mido
 import pyautogui
 from osascript import osascript
 
+# Get Name of MIDI Controller Port
+hardware = 'FCB 1010'   # Default is FCB 1010 (my MIDI pedalboard)
+
+# Get Port Name from Command Line Arguments (If Present)
+if len(sys.argv) == 2:
+    hardware = sys.argv[1]
+
 # Listen for Input from PedalBoard
-with mido.open_input('FCB 1010') as inport:
+with mido.open_input(hardware) as inport:
     volume_increment = 6.25
     
     modifiers = {
