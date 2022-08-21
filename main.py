@@ -6,6 +6,8 @@ import mido
 import pyautogui
 from osascript import osascript
 
+hotkeyDelay = 0.3   # Delay Used to Allow Macs to Keep Up
+
 # Get Name of MIDI Controller Port
 hardware = 'FCB 1010'   # Default is FCB 1010 (my MIDI pedalboard)
 
@@ -64,12 +66,12 @@ with mido.open_input(hardware) as inport:
 
             # Hotkey Macros
             elif control == 6:
-                pyautogui.hotkey('command', 'v')
+                pyautogui.hotkey('command', 'v', interval=hotkeyDelay)
             elif control == 7:
-                pyautogui.hotkey('command', 'c')
+                pyautogui.hotkey('command', 'c', interval=hotkeyDelay)
             elif control == 8:
-                pyautogui.hotkey('ctrl', 'shift', '`')
+                pyautogui.hotkey('ctrl', 'shift', '`', interval=hotkeyDelay)
             elif control == 9:
                 pyautogui.press('f5')
             elif control == 10:
-                pyautogui.hotkey('ctrl', 'c')
+                pyautogui.hotkey('ctrl', 'c', interval=hotkeyDelay)
